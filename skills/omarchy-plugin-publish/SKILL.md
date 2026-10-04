@@ -37,6 +37,8 @@ Use focused behavioral checks for actual risks: over-limit stdout **and stderr**
 
 Finish code, tests, docs, version changes and CI pins before refreshing remote validation. Inspect local changes and distinguish local HEAD from the GitHub default-branch HEAD. Commit/push only within the user's authorization. Record the full 40-character published SHA; a local-only fix is not reviewable remotely.
 
+When a fix lands in a separately published companion package, release it first: publish the new version (usually the author's own registry action), confirm the registry serves it and its archive contains the fix, then bump the plugin's pin, push, and refresh the issue. A pin to a version that does not exist yet is not reviewable.
+
 Keep the default branch stable during review; ongoing development can continue on a separate branch. Any published change, including README-only changes, requires fresh evidence. Do not freeze the branch by changing GitHub protection settings.
 
 Re-run `scripts/readiness-check.sh` against the final commit, then run available static validation from requirements.md. A local preflight is advisory and does not replace bot-authored evidence. Runtime testing requires an appropriate authorized test environment; cloning/enabling an Omarchy plugin can change the active shell.

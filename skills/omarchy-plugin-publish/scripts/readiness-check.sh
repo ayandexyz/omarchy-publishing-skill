@@ -273,6 +273,44 @@ if [ -n "$DISCOVERY" ]; then
 $(printf '%s' "$DISCOVERY" | sed 's/^/    /')"
 fi
 
+# Code files only: docs mention these tools without passing data to them.
+code_scan() { # pattern -> "file:line: text"
+  local pat="$1"
+  printf '%s\n' "$SCAN" | grep -viE '(readme|changelog|contributing|security|license|docs?/|(^|/)tests?/|(^|/)spec/|[._-](test|spec)\.|\.md$|\.d\.ts$|\.map$)' | while IFS= read -r f; do
+    [ -f "$DIR/$f" ] || continue
+    grep -nHE "$pat" "$DIR/$f" 2>/dev/null | head -3 | sed "s|^$DIR/||"
+  done | head -6
+}
+
+# Process arguments are world-readable through /proc/<pid>/cmdline, so private
+# content passed as argv is disclosed to other local users even with no shell.
+ARGV_SINKS="$(code_scan '(notify-send|zenity|kdialog|dunstify|wl-copy|xclip)')"
+if [ -n "$ARGV_SINKS" ]; then
+  warn "A helper that takes its content as process arguments is called from code. Other local users can read any process's arguments through /proc/<pid>/cmdline, so private content (agent questions, commands, file paths, messages, titles) must not go into argv - send fixed text, or use stdin/D-Bus. An execFile/argv array prevents shell injection, not this. Fixed or non-private text is fine; check what each call actually passes:
+$(printf '%s' "$ARGV_SINKS" | sed 's/^/    /')"
+fi
+
+# A client that discovers a loopback daemon through a connection file. When the
+# daemon stops, the file can outlive it and the freed port is free for any
+# local user, who then receives the token and payload and can forge replies.
+LOOPBACK_CLIENT="$(code_scan '(port\.json|connection\.json|127\.0\.0\.1:|localhost:)')"
+if [ -n "$LOOPBACK_CLIENT" ]; then
+  warn "Code dials a loopback port, apparently from a connection file. Expect the reviewer to ask what happens when that file outlives the daemon: verify the connected peer's identity (e.g. its socket uid in /proc/net/tcp) before sending the token or private data, authenticate replies with a key that is never sent (HMAC over nonce, status and body), fail closed, and remove the file on shutdown. A bearer token alone authenticates the client, not the server. If this is already handled, say how in the maintainer notes:
+$(printf '%s' "$LOOPBACK_CLIENT" | sed 's/^/    /')"
+fi
+
+# A pinned companion package is reviewed too: the maintainer audits its
+# published archive and source, and a fix there needs a new release.
+COMPANION="$(printf '%s\n' "$SCAN" | grep -iE '(readme|docs?/)' | while IFS= read -r f; do
+  [ -f "$DIR/$f" ] || continue
+  grep -nHE '(npm|pnpm|pipx|uv[[:space:]]+tool|cargo)[[:space:]]+(install|i|add)[[:space:]].*(@[0-9]|==[0-9]|--version[[:space:]])' "$DIR/$f" 2>/dev/null \
+    | head -2 | sed "s|^$DIR/||"
+done | head -3)"
+if [ -n "$COMPANION" ]; then
+  note "A pinned companion package is documented. Reviewers audit the published package at that pin (its archive and source), not only this repository, so run the review patterns over the companion too. A fix there means: publish a new version, bump the pin here, push, then edit the issue.
+$(printf '%s' "$COMPANION" | sed 's/^/    /')"
+fi
+
 REMOTE_GIT="$(grep_scan 'git[[:space:]]+clone[^\n]*(--branch|--depth|https?://)')"
 if [ -n "$REMOTE_GIT" ]; then
   warn "[remote-git-execution-unpinned] A remote Git source is cloned. If its code is then built or executed, bind it to a full 40-character commit and check out detached:

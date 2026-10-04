@@ -6,6 +6,8 @@ Inspected metadata for the 100 most recently updated `submission` issues, then r
 
 Amended 2026-09-24 with one first-hand thread, [#8397](https://github.com/omacom/omarchy-plugin-marketplace/issues/8397) (Glance Face Unlock), observed live rather than sampled: a supply-chain finding against an unpinned companion-application install that the plugin executes. It is the source of the unpinned-install check in `scripts/readiness-check.sh` and the opening paragraph of the dependencies section in `review-patterns.md`. It returned a second round at the next commit -- the documented install was pinned but the plugin still auto-selected unpinned locations -- which is the source of the executable-discovery check and the paragraph beside it. At time of writing that issue is open and unresolved, so it evidences the findings, not an outcome.
 
+Amended 2026-10-04 with a second first-hand thread, [#9941](https://github.com/omacom/omarchy-plugin-marketplace/issues/9941) (Hommies), followed live through three reviews to `approved-and-verified` (marketplace source [cdf7235a1c464e3dce572bc8e8cfbc26a4e97f88](https://github.com/omacom/omarchy-plugin-marketplace/tree/cdf7235a1c464e3dce572bc8e8cfbc26a4e97f88)). Both findings were in the pinned companion npm package, not the plugin repository: private text in `notify-send` arguments, then hook clients trusting a stale loopback `port.json`. They are the source of the process-argument paragraph in the secrets section, the loopback-client paragraph in the network section, the companion-package paragraph in the dependencies section, and the matching three heuristics in `scripts/readiness-check.sh`. Unlike #8397, this thread evidences an outcome: the fixes described were accepted.
+
 | Issue | Title | State when fetched | Comments fetched | Maintainer comments |
 | --- | --- | --- | --- | --- |
 | [#2542](https://github.com/omacom/omarchy-plugin-marketplace/issues/2542) | [Plugin]: BatPuter v3.0 — Wayne Tech Tactical Productivity HUD | closed; not marked listed | 13 | 4 |
@@ -50,6 +52,7 @@ Amended 2026-09-24 with one first-hand thread, [#8397](https://github.com/omacom
 | [#8328](https://github.com/omacom/omarchy-plugin-marketplace/issues/8328) | [Plugin]: Taskwarrior Time | closed; not marked listed | 8 | 2 |
 | [#8330](https://github.com/omacom/omarchy-plugin-marketplace/issues/8330) | [Plugin]: Omodachi | open; not marked listed | 4 | 1 |
 | [#8397](https://github.com/omacom/omarchy-plugin-marketplace/issues/8397) | [Plugin]: Glance Face Unlock | open; needs-fixes | 4 | 2 |
+| [#9941](https://github.com/omacom/omarchy-plugin-marketplace/issues/9941) | [Plugin]: Hommies | open; approved-and-verified, manual-setup | 6 | 3 |
 
 The account `github-actions[bot]` supplied automated reports. `HANCORE-linux` supplied the review comments used here. Public account identity does not establish how reviews were authored. Issue #8078 provides a listed example with review-capability labels and no HANCORE prose in the fetched thread; do not infer why a maintainer approved from absence of a comment.
 
